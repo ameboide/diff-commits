@@ -3,7 +3,7 @@
 // @namespace   ameboide
 // @include     https://bitbucket.org/*
 // @include     https://github.com/*
-// @version     1
+// @version     1.1
 // @grant       none
 // ==/UserScript==
 
@@ -15,8 +15,8 @@ var stuff = {
   },
   github: {
     url: function(from, to){ return url + '/compare/' + from + '...' + to + '?w=1&ts=2' },
-    button_class: 'counter',
-    link_selector: '.commit-id'
+    button_class: 'btn btn-outline',
+    link_selector: 'a.sha'
   }
 };
 var site_stuff = stuff[document.location.href.match(/\/\/(\w+)/)[1]];
@@ -44,6 +44,7 @@ function setCommit(event){
 
 function addButtons(){
   var links = document.querySelectorAll(site_stuff.link_selector + ':not(.diff-parsed)');
+  if(links.length < 2) return;
   for(var link of links){
     link.classList.add('diff-parsed');
     var m = link.href.match(/commits?\/(\w{40})(\?|$)/);
