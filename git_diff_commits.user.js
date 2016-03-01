@@ -3,7 +3,7 @@
 // @namespace   ameboide
 // @include     https://bitbucket.org/*
 // @include     https://github.com/*
-// @version     1.1
+// @version     1.2
 // @grant       none
 // ==/UserScript==
 
@@ -11,12 +11,18 @@ var stuff = {
   bitbucket: {
     url: function(from, to){ return url + '.git/branches/compare/' + to + '..' + from + '?w=1&ts=2#diff' },
     button_class: 'aui-lozenge',
-    link_selector: 'a[href*="/commits/"]'
+    link_selector: 'a[href*="/commits/"]',
+    branch_counter_selector: '.branches-list .value',
+    base_branch_selector: '.main-branch',
+    branch_behind_selector: '.behind'
   },
   github: {
     url: function(from, to){ return url + '/compare/' + from + '...' + to + '?w=1&ts=2' },
     button_class: 'btn btn-outline',
-    link_selector: 'a.sha'
+    link_selector: 'a.sha',
+    branch_counter_selector: '.branch-summary .count-value',
+    base_branch_selector: '.default-label',
+    branch_behind_selector: '.count-behind'
   }
 };
 var site_stuff = stuff[document.location.href.match(/\/\/(\w+)/)[1]];
@@ -42,10 +48,27 @@ function setCommit(event){
   document.querySelector('.diff-from').classList.remove('diff-from');
 }
 
-function addButtons(){
+function addBranchLinks(){
+  if(!site_stuff.branch_counter_selector) return ;
+  var counters = document.querySelectorAll(site_stuff.branch_counter_selector + ':not(.diff-parsed)');
+  if(!counters.length) return;
+  var base_branch = document.querySelector(site_stuff.base_branch_selector).closest('[data-branch-name]').dataset.branchName;
+  for(var i = 0; i < counters.length; i++){
+    counter = counters[i];
+    counter.classList.add('diff-parsed');
+    var branch = counter.closest('[data-branch-name]').dataset.branchName;
+    var u = counter.closest(site_stuff.branch_behind_selector) ?
+      site_stuff.url(branch, base_branch) :
+      site_stuff.url(base_branch, branch);
+    counter.innerHTML = '<a href="' + u + '">' + counter.innerHTML + '</a>';
+  }
+}
+
+function addCommitButtons(){
   var links = document.querySelectorAll(site_stuff.link_selector + ':not(.diff-parsed)');
   if(links.length < 2) return;
-  for(var link of links){
+  for(var i = 0; i < links.length; i++){
+    link = links[i];
     link.classList.add('diff-parsed');
     var m = link.href.match(/commits?\/(\w{40})(\?|$)/);
     if(!m) continue;
@@ -58,6 +81,11 @@ function addButtons(){
 
     link.parentNode.insertBefore(button, link.nextElementSibling);
   }
+}
+
+function addButtons(){
+  addCommitButtons();
+  addBranchLinks();
 }
 
 setInterval(addButtons, 1000);
