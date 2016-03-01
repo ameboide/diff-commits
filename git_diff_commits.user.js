@@ -54,7 +54,7 @@ function addBranchLinks(){
   if(!counters.length) return;
   var base_branch = document.querySelector(site_stuff.base_branch_selector).closest('[data-branch-name]').dataset.branchName;
   for(var i = 0; i < counters.length; i++){
-    counter = counters[i];
+    var counter = counters[i];
     counter.classList.add('diff-parsed');
     var branch = counter.closest('[data-branch-name]').dataset.branchName;
     var u = counter.closest(site_stuff.branch_behind_selector) ?
@@ -68,7 +68,7 @@ function addCommitButtons(){
   var links = document.querySelectorAll(site_stuff.link_selector + ':not(.diff-parsed)');
   if(links.length < 2) return;
   for(var i = 0; i < links.length; i++){
-    link = links[i];
+    var link = links[i];
     link.classList.add('diff-parsed');
     var m = link.href.match(/commits?\/(\w{40})(\?|$)/);
     if(!m) continue;
